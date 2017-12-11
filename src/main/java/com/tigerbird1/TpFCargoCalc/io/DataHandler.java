@@ -28,10 +28,15 @@ public class DataHandler extends XMLEventHandler {
 
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
-		if ("".equals(uri)) {
+		if (!"".equals(uri)) {
 			dataDels.forEach( del -> del.receiveData(uri+"."+localName, atts));
 		} else {
 			dataDels.forEach( del -> del.receiveData(qName, atts));
 		}
+
+		//System.out.printf("%s\n",qName);
 	}
+
+	@Override
+	public void characters(char[] ch, int start, int length) throws SAXException {}
 }

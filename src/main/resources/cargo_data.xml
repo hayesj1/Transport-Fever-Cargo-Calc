@@ -2,214 +2,214 @@
 <data>
 	<cargodefs>
 		<cargogroup label="Raw">
-			<cargodef id="0" name="Logs"/>
-			<cargodef id="1" name="Livestock"/>
-			<cargodef id="2" name="Coal"/>
-			<cargodef id="3" name="Iron ore"/>
-			<cargodef id="4" name="Stone"/>
-			<cargodef id="5" name="Grain"/>
-			<cargodef id="6" name="Crude oil"/>
+			<cargodef c_id="0" name="Logs"/>
+			<cargodef c_id="1" name="Livestock"/>
+			<cargodef c_id="2" name="Coal"/>
+			<cargodef c_id="3" name="Iron ore"/>
+			<cargodef c_id="4" name="Stone"/>
+			<cargodef c_id="5" name="Grain"/>
+			<cargodef c_id="6" name="Crude oil"/>
 		</cargogroup>
 		<cargogroup label="Intermediate">
-			<cargodef id="7" name="Steel"/>
-			<cargodef id="8" name="Planks"/>
-			<cargodef id="9" name="Plastic"/>
-			<cargodef id="10" name="Slag"/>
-			<cargodef id="11" name="Oil"/>
+			<cargodef c_id="7" name="Steel"/>
+			<cargodef c_id="8" name="Planks"/>
+			<cargodef c_id="9" name="Plastic"/>
+			<cargodef c_id="10" name="Slag"/>
+			<cargodef c_id="11" name="Oil"/>
 		</cargogroup>
 		<cargogroup label="End">
-			<cargodef id="12" name="Construction materials"/>
-			<cargodef id="13" name="Machines"/>
-			<cargodef id="14" name="Fuel"/>
-			<cargodef id="15" name="Tools"/>
-			<cargodef id="16" name="Food"/>
-			<cargodef id="17" name="Goods"/>
+			<cargodef c_id="12" name="Construction materials"/>
+			<cargodef c_id="13" name="Machines"/>
+			<cargodef c_id="14" name="Fuel"/>
+			<cargodef c_id="15" name="Tools"/>
+			<cargodef c_id="16" name="Food"/>
+			<cargodef c_id="17" name="Goods"/>
 		</cargogroup>
 	</cargodefs>
 	<recipes>
 		<recipe>
 			<input></input>
 			<output>
-				<cargo id="0" amount="1"/> <!-- Logs -->
+				<cargo c_id="0" amount="1"/> <!-- Logs -->
 			</output>
 		</recipe>
 		<recipe>
 			<input></input>
 			<output>
-				<cargo id="1" amount="1"/> <!-- Livestock -->
+				<cargo c_id="1" amount="1"/> <!-- Livestock -->
 			</output>
 		</recipe>
 		<recipe>
 			<input></input>
 			<output>
-				<cargo id="2" amount="1"/> <!-- Coal -->
+				<cargo c_id="2" amount="1"/> <!-- Coal -->
 			</output>
 		</recipe>
 		<recipe>
 			<input></input>
 			<output>
-				<cargo id="3" amount="1"/> <!-- Iron Ore -->
+				<cargo c_id="3" amount="1"/> <!-- Iron Ore -->
 			</output>
 		</recipe>
 		<recipe>
 			<input></input>
 			<output>
-				<cargo id="4" amount="1"/> <!-- Stone -->
+				<cargo c_id="4" amount="1"/> <!-- Stone -->
 			</output>
 		</recipe>
 		<recipe>
 			<input></input>
 			<output>
-				<cargo id="5" amount="1"/> <!-- Grain -->
+				<cargo c_id="5" amount="1"/> <!-- Grain -->
 			</output>
 		</recipe>
 		<recipe>
 			<input></input>
 			<output>
-				<cargo id="6" amount="1"/> <!-- Crude oil -->
+				<cargo c_id="6" amount="1"/> <!-- Crude oil -->
 			</output>
 		</recipe>
 		<recipe>
 			<input>
-				<cargo id="0" amount="1"/> <!-- Logs -->
+				<cargo c_id="0" amount="1"/> <!-- Logs -->
 			</input>
 			<output>
-				<cargo id="8" amount="1"/> <!-- Planks -->
+				<cargo c_id="8" amount="1"/> <!-- Planks -->
 			</output>
 		</recipe>
 		<recipe>
 			<input>
-				<cargo id="4" amount="1"/> <!-- Stone -->
+				<cargo c_id="4" amount="1"/> <!-- Stone -->
 			</input>
 			<output>
-				<cargo id="12" amount="1"/> <!-- Construction materials -->
+				<cargo c_id="12" amount="1"/> <!-- Construction materials -->
 			</output>
 		</recipe>
 		<recipe>
 			<input>
-				<cargo id="10" amount="1"/> <!-- Slag -->
+				<cargo c_id="10" amount="1"/> <!-- Slag -->
 			</input>
 			<output>
-				<cargo id="12" amount="1"/> <!-- Construction materials -->
+				<cargo c_id="12" amount="1"/> <!-- Construction materials -->
 			</output>
 		</recipe>
 		<recipe>
 			<input>
-				<cargo id="6" amount="1"/> <!-- Crude oil -->
+				<cargo c_id="6" amount="1"/> <!-- Crude oil -->
 			</input>
 			<output>
-				<cargo id="11" amount="1"/> <!-- Oil -->
+				<cargo c_id="11" amount="1"/> <!-- Oil -->
 			</output>
 		</recipe>
 		<recipe>
 		<input>
-			<cargo id="6" amount="1"/> <!-- Crude oil -->
+			<cargo c_id="6" amount="1"/> <!-- Crude oil -->
 		</input>
 		<output>
-			<cargo id="14" amount="1"/> <!-- Fuel -->
+			<cargo c_id="14" amount="1"/> <!-- Fuel -->
 		</output>
 		</recipe>
 		<recipe>
 			<input>
-				<cargo id="1" amount="1"/> <!-- Livestock -->
+				<cargo c_id="1" amount="1"/> <!-- Livestock -->
 			</input>
 			<output>
-				<cargo id="16" amount="1"/> <!-- Food -->
+				<cargo c_id="16" amount="1"/> <!-- Food -->
 			</output>
 		</recipe>
 		<recipe>
 			<input>
-				<cargo id="5" amount="1"/> <!-- Grain -->
+				<cargo c_id="5" amount="1"/> <!-- Grain -->
 			</input>
 			<output>
-				<cargo id="16" amount="1"/> <!-- Food -->
+				<cargo c_id="16" amount="1"/> <!-- Food -->
 			</output>
 		</recipe>
 		<recipe>
 			<input>
-				<cargo id="5" amount="2"/> <!-- Grain -->
+				<cargo c_id="5" amount="2"/> <!-- Grain -->
 			</input>
 			<output>
-				<cargo id="9" amount="1"/> <!-- Plastic -->
+				<cargo c_id="9" amount="1"/> <!-- Plastic -->
 			</output>
 		</recipe>
 		<recipe>
 			<input>
-				<cargo id="11" amount="1"/> <!-- Oil -->
+				<cargo c_id="11" amount="1"/> <!-- Oil -->
 			</input>
 			<output>
-				<cargo id="9" amount="1"/> <!-- Plastic -->
+				<cargo c_id="9" amount="1"/> <!-- Plastic -->
 			</output>
 		</recipe>
 		<recipe>
 			<input>
-				<cargo id="2" amount="1"/> <!-- Coal -->
-				<cargo id="3" amount="1"/> <!-- Iron ore -->
+				<cargo c_id="2" amount="1"/> <!-- Coal -->
+				<cargo c_id="3" amount="1"/> <!-- Iron ore -->
 			</input>
 			<output>
-				<cargo id="7" amount="1"/> <!-- Steel -->
+				<cargo c_id="7" amount="1"/> <!-- Steel -->
 			</output>
 		</recipe>
 		<recipe>
 			<input>
-				<cargo id="2" amount="1"/> <!-- Coal -->
-				<cargo id="3" amount="1"/> <!-- Iron ore -->
+				<cargo c_id="2" amount="1"/> <!-- Coal -->
+				<cargo c_id="3" amount="1"/> <!-- Iron ore -->
 			</input>
 			<output>
-				<cargo id="7" amount="2"/> <!-- Steel -->
-				<cargo id="10" amount="1"/> <!-- Slag -->
+				<cargo c_id="7" amount="2"/> <!-- Steel -->
+				<cargo c_id="10" amount="1"/> <!-- Slag -->
 			</output>
 		</recipe>
 		<recipe>
 			<input>
-				<cargo id="7" amount="1"/> <!-- Steel -->
-				<cargo id="8" amount="2"/> <!-- Planks -->
+				<cargo c_id="7" amount="1"/> <!-- Steel -->
+				<cargo c_id="8" amount="2"/> <!-- Planks -->
 			</input>
 			<output>
-				<cargo id="13" amount="1"/> <!-- Machines -->
+				<cargo c_id="13" amount="1"/> <!-- Machines -->
 			</output>
 		</recipe>
 		<recipe>
 			<input>
-				<cargo id="7" amount="1"/> <!-- Steel -->
-				<cargo id="9" amount="1"/> <!-- Plastic -->
+				<cargo c_id="7" amount="1"/> <!-- Steel -->
+				<cargo c_id="9" amount="1"/> <!-- Plastic -->
 			</input>
 			<output>
-				<cargo id="13" amount="1"/> <!-- Machines -->
+				<cargo c_id="13" amount="1"/> <!-- Machines -->
 			</output>
 		</recipe>
 		<recipe>
 			<input>
-				<cargo id="8" amount="2"/> <!-- Planks -->
+				<cargo c_id="8" amount="2"/> <!-- Planks -->
 			</input>
 			<output>
-				<cargo id="15" amount="1"/> <!-- Tools -->
+				<cargo c_id="15" amount="1"/> <!-- Tools -->
 			</output>
 		</recipe>
 		<recipe>
 			<input>
-				<cargo id="7" amount="1"/> <!-- Steel -->
+				<cargo c_id="7" amount="1"/> <!-- Steel -->
 			</input>
 			<output>
-				<cargo id="15" amount="1"/> <!-- Tools -->
+				<cargo c_id="15" amount="1"/> <!-- Tools -->
 			</output>
 		</recipe>
 		<recipe>
 			<input>
-				<cargo id="7" amount="1"/> <!-- Steel -->
-				<cargo id="8" amount="1"/> <!-- Planks -->
+				<cargo c_id="7" amount="1"/> <!-- Steel -->
+				<cargo c_id="8" amount="1"/> <!-- Planks -->
 			</input>
 			<output>
-				<cargo id="17" amount="1"/> <!-- Goods -->
+				<cargo c_id="17" amount="1"/> <!-- Goods -->
 			</output>
 		</recipe>
 		<recipe>
 			<input>
-				<cargo id="8" amount="1"/> <!-- Planks -->
-				<cargo id="9" amount="1"/> <!-- Plastic -->
+				<cargo c_id="8" amount="1"/> <!-- Planks -->
+				<cargo c_id="9" amount="1"/> <!-- Plastic -->
 			</input>
 			<output>
-				<cargo id="17" amount="1"/> <!-- Goods -->
+				<cargo c_id="17" amount="1"/> <!-- Goods -->
 			</output>
 		</recipe>
 	</recipes>

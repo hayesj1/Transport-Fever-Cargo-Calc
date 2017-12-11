@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.tigerbird1.TpFCargoCalc.ui.CargoCalcUI">
-  <grid id="27dc6" binding="panel" layout-manager="GridLayoutManager" row-count="5" column-count="6" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-    <margin top="0" left="0" bottom="0" right="0"/>
+  <grid id="27dc6" binding="panel" layout-manager="GridLayoutManager" row-count="5" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="8" left="8" bottom="8" right="8"/>
     <constraints>
-      <xy x="20" y="20" width="719" height="528"/>
+      <xy x="20" y="20" width="959" height="586"/>
     </constraints>
     <properties/>
     <clientProperties>
@@ -13,7 +13,7 @@
     <children>
       <component id="3ccb3" class="javax.swing.JTextField" binding="capacity">
         <constraints>
-          <grid row="4" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+          <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
             <preferred-size width="150" height="-1"/>
           </grid>
         </constraints>
@@ -24,18 +24,9 @@
           <html.disable class="java.lang.Boolean" value="true"/>
         </clientProperties>
       </component>
-      <component id="2c72a" class="javax.swing.JButton" binding="addCity">
-        <constraints>
-          <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <text value="+ City"/>
-          <toolTipText value="Add City"/>
-        </properties>
-      </component>
       <component id="6b003" class="javax.swing.JLabel">
         <constraints>
-          <grid row="3" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <text value="Capacity"/>
@@ -46,12 +37,13 @@
       </component>
       <component id="bb55e" class="javax.swing.JTree" binding="legs" custom-create="true">
         <constraints>
-          <grid row="0" column="3" row-span="3" col-span="3" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
-            <preferred-size width="150" height="50"/>
+          <grid row="0" column="2" row-span="2" col-span="3" vsize-policy="6" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="20" height="60"/>
+            <preferred-size width="20" height="60"/>
           </grid>
         </constraints>
         <properties>
-          <autoscrolls value="true"/>
+          <autoscrolls value="false"/>
           <dragEnabled value="true"/>
           <dropMode value="INSERT"/>
           <editable value="true"/>
@@ -62,13 +54,13 @@
           <visible value="true"/>
         </properties>
         <clientProperties>
-          <JTree.lineStyle class="java.lang.String" value="dashed"/>
+          <JTree.lineStyle class="java.lang.String" value=""/>
           <html.disable class="java.lang.Boolean" value="true"/>
         </clientProperties>
       </component>
       <component id="2f992" class="javax.swing.JLabel">
         <constraints>
-          <grid row="3" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="3" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <text value="Frequency (mins:secs)"/>
@@ -76,7 +68,7 @@
       </component>
       <component id="80a20" class="javax.swing.JTextField" binding="frequency">
         <constraints>
-          <grid row="4" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+          <grid row="4" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
             <preferred-size width="150" height="-1"/>
           </grid>
         </constraints>
@@ -89,7 +81,7 @@
       </component>
       <component id="e67b" class="javax.swing.JLabel" binding="nVehiclesLabel">
         <constraints>
-          <grid row="3" column="5" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="3" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <text value="Vehicle(s): "/>
@@ -97,7 +89,7 @@
       </component>
       <component id="3010a" class="javax.swing.JSlider" binding="nVehicles">
         <constraints>
-          <grid row="4" column="5" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="4" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <extent value="0"/>
@@ -119,47 +111,80 @@
           <html.disable class="java.lang.Boolean" value="true"/>
         </clientProperties>
       </component>
+      <component id="b8848" class="javax.swing.JButton" binding="addBaseProduct">
+        <constraints>
+          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="+ Base Product"/>
+        </properties>
+      </component>
       <component id="b6b10" class="javax.swing.JButton" binding="addLeg">
         <constraints>
-          <grid row="4" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <text value="+ Leg"/>
           <toolTipText value="Add leg"/>
         </properties>
       </component>
-      <vspacer id="a017">
+      <component id="4066" class="javax.swing.JButton" binding="editSettings">
         <constraints>
-          <grid row="0" column="0" row-span="3" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
-      </vspacer>
-      <component id="a2be8" class="javax.swing.JComboBox" binding="cargoTypesChooser" custom-create="true">
-        <constraints>
-          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties/>
+        <properties>
+          <text value="Settings"/>
+        </properties>
       </component>
       <component id="79ac9" class="javax.swing.JButton" binding="moveItemU">
         <constraints>
-          <grid row="0" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <text value="Move up"/>
         </properties>
       </component>
-      <vspacer id="de2c8">
+      <component id="2c72a" class="javax.swing.JButton" binding="addCity">
         <constraints>
-          <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="+ City"/>
+          <toolTipText value="Add City"/>
+        </properties>
+      </component>
+      <component id="a2be8" class="javax.swing.JComboBox" binding="cargoTypesChooser" custom-create="true">
+        <constraints>
+          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+      </component>
+      <vspacer id="fca29">
+        <constraints>
+          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
         </constraints>
       </vspacer>
+      <component id="81022" class="javax.swing.JButton" binding="validate">
+        <constraints>
+          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Validate"/>
+        </properties>
+      </component>
       <component id="dd4f5" class="javax.swing.JButton" binding="moveItemD">
         <constraints>
-          <grid row="1" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <text value="Move down"/>
         </properties>
       </component>
+      <vspacer id="cbd6e">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+        </constraints>
+      </vspacer>
     </children>
   </grid>
 </form>

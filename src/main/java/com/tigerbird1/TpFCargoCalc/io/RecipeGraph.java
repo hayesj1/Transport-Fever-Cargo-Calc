@@ -28,7 +28,7 @@ public class RecipeGraph implements DataDelegate {
 		int amount = 0;
 		for (int i = 0; i < atts.getLength(); i++) {
 			switch (atts.getQName(i)) {
-				case "id":
+				case "c_id":
 					cargo = this.cargoes.getName(atts.getValue(i));
 					break;
 				case "amount":
@@ -56,7 +56,6 @@ public class RecipeGraph implements DataDelegate {
 			default:
 				break;
 		}
-
 	}
 
 	@Override

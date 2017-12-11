@@ -25,7 +25,7 @@ public class CargoTypes implements DataDelegate {
 				case "label":
 					label = atts.getValue(i);
 					break;
-				case "id":
+				case "c_id":
 					id = Integer.valueOf(atts.getValue(i));
 					break;
 				case "name":
@@ -34,12 +34,14 @@ public class CargoTypes implements DataDelegate {
 					break;
 			}
 		}
+
 		switch(element) {
 			case "cargogroup":
 				this.group = label;
 				break;
 			case "cargodef":
 				this.cargoes.put(id, name);
+				System.out.println("Adding cargo: "+name);
 				break;
 			default:
 				break;
@@ -57,5 +59,5 @@ public class CargoTypes implements DataDelegate {
 		return cargoes.getOrDefault(Integer.valueOf(id), "None");
 	}
 
-	public String[] getCargoTypes() { if (cargoes == null) { } return cargoes.values().toArray(new String[0]); }
+	public String[] getCargoTypes() { if (cargoes == null) { return new String[] {"None"}; } return cargoes.values().toArray(new String[0]); }
 }

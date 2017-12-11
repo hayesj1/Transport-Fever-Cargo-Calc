@@ -6,6 +6,7 @@ import org.xml.sax.helpers.XMLReaderFactory;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 
 public class AppIO {
@@ -42,8 +43,8 @@ public class AppIO {
 
 	public Configuration readConfig() {
 		try {
-			configReader.parse(new InputSource(new FileReader("config.xml")));
-		} catch (IOException | SAXException e) {
+			configReader.parse(new InputSource(new FileReader(this.getClass().getClassLoader().getResource("config.xml").getFile())));
+		} catch (IOException | SAXException | NullPointerException e) {
 			e.printStackTrace();
 		}
 		return config.getConfiguration();
@@ -55,8 +56,8 @@ public class AppIO {
 
 	public void readCargoData() {
 		try {
-			dataReader.parse(new InputSource(new FileReader("cargo_data.xml")));
-		} catch (IOException | SAXException e) {
+			dataReader.parse(new InputSource(new FileReader(this.getClass().getClassLoader().getResource("cargo_data.xml").getFile())));
+		} catch (IOException | SAXException | NullPointerException e) {
 			e.printStackTrace();
 		}
 	}
