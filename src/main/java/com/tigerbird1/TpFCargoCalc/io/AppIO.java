@@ -4,9 +4,7 @@ import com.tigerbird1.TpFCargoCalc.Configuration;
 import org.xml.sax.*;
 import org.xml.sax.helpers.XMLReaderFactory;
 
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.URISyntaxException;
+import java.io.*;
 
 
 public class AppIO {
@@ -16,7 +14,7 @@ public class AppIO {
 	private ConfigHandler config;
 
 	private DataHandler cargoData;
-	private CargoTypes cargoes;
+	private Cargoes cargoes;
 	private RecipeGraph recipes;
 
 	public AppIO() {
@@ -30,10 +28,10 @@ public class AppIO {
 		config = new ConfigHandler();
 
 		cargoData = new DataHandler();
-		cargoes = new CargoTypes();
+		cargoes = new Cargoes();
 		recipes = new RecipeGraph();
 
-		recipes.setCargoTypes(cargoes);
+		recipes.setCargoes(cargoes);
 		cargoData.addDelegate(cargoes);
 		cargoData.addDelegate(recipes);
 
@@ -41,9 +39,9 @@ public class AppIO {
 		dataReader.setContentHandler(cargoData);
 	}
 
-	public Configuration readConfig() {
+	public Configuration readConfig(InputStream config_file) {
 		try {
-			configReader.parse(new InputSource(new FileReader(this.getClass().getClassLoader().getResource("config.xml").getFile())));
+			configReader.parse(new InputSource(config_file));
 		} catch (IOException | SAXException | NullPointerException e) {
 			e.printStackTrace();
 		}
@@ -52,17 +50,18 @@ public class AppIO {
 
 	public void saveConfig(Configuration configuration) {
 		//TODO save configuration
+		return;
 	}
 
-	public void readCargoData() {
+	public void readCargoData(InputStream data_file) {
 		try {
-			dataReader.parse(new InputSource(new FileReader(this.getClass().getClassLoader().getResource("cargo_data.xml").getFile())));
+			dataReader.parse(new InputSource(data_file));
 		} catch (IOException | SAXException | NullPointerException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public CargoTypes getCargoes() {
+	public Cargoes getCargoes() {
 		return cargoes;
 	}
 

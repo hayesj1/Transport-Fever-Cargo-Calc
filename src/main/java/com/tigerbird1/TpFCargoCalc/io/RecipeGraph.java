@@ -1,38 +1,42 @@
 package com.tigerbird1.TpFCargoCalc.io;
 
+import com.tigerbird1.TpFCargoCalc.Cargo;
 import org.xml.sax.Attributes;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Objects;
+import java.util.*;
 
-public class RecipeGraph implements DataDelegate {
-	private ArrayList<RecipeItem> vertices;
-	private ArrayList<Recipe> edges;
+public final class RecipeGraph implements DataDelegate {
+	private HashMap<Cargo, RecipeItem> vertices;
+	private HashSet<Recipe> edges;
 
-	private CargoTypes cargoes;
+	private Cargoes cargoes;
 	private RecipeContext context;
 	private boolean receivingInputs;
 
 	@Override
 	public void initialize() {
-		vertices = new ArrayList<>();
-		edges = new ArrayList<>();
+		vertices = new HashMap<>();
+		edges = new HashSet<>();
 		context = new RecipeContext();
 		receivingInputs = true;
 	}
 
 	@Override
 	public void receiveData(String element, Attributes atts) {
-		String cargo = "";
+		RecipeItem item;
+		String name = "";
+		int c_id = -1;
 		int amount = 0;
+
 		for (int i = 0; i < atts.getLength(); i++) {
+			String value = atts.getValue(i);
 			switch (atts.getQName(i)) {
 				case "c_id":
-					cargo = this.cargoes.getName(atts.getValue(i));
+					c_id = Integer.valueOf(value);
+					name = cargoes.getName(value);
 					break;
 				case "amount":
-					amount = Integer.valueOf(atts.getValue(i));
+					amount = Integer.valueOf(value);
 					break;
 				default:
 					break;
@@ -50,9 +54,11 @@ public class RecipeGraph implements DataDelegate {
 				receivingInputs = false;
 				break;
 			case "cargo":
-				if (this.receivingInputs) { this.context.addInput(cargo, amount); }
-				else { this.context.addOutput(cargo, amount); }
-				break;
+				Cargo cargo = cargoes.getCargoByCID(c_id);
+				item = vertices.getOrDefault(cargo,  new RecipeItem(cargo));
+				if (this.receivingInputs) { this.context.addInput(item, amount); }
+				else { this.context.addOutput(item, amount); }
+
 			default:
 				break;
 		}
@@ -64,8 +70,8 @@ public class RecipeGraph implements DataDelegate {
 		this.receivingInputs = false;
 	}
 
-	public void setCargoTypes(CargoTypes cargoTypes) {
-		this.cargoes = cargoTypes;
+	public void setCargoes(Cargoes cargoes) {
+		this.cargoes = cargoes;
 	}
 
 
@@ -80,20 +86,20 @@ public class RecipeGraph implements DataDelegate {
 			clear = true;
 		}
 
-		void addInput(String cargoType, int amount) {
-			this.inputs.put(new RecipeItem(cargoType), amount);
+		void addInput(RecipeItem vertex, int amount) {
+			this.inputs.put(vertex, amount);
 			clear = false;
 		}
-		void addOutput(String cargoType, int amount) {
-			this.outputs.put(new RecipeItem(cargoType), amount);
+		void addOutput(RecipeItem vertex, int amount) {
+			this.outputs.put(vertex,  amount);
 			clear = false;
 		}
 
 		Recipe createRecipe() {
 			Recipe ret = new Recipe();
 
-			inputs.forEach(ret::addProduct);
-			outputs.forEach(ret::addComponent);
+			inputs.forEach(ret::addComponent);
+			outputs.forEach(ret::addProduct);
 
 			return ret;
 		}
@@ -106,7 +112,7 @@ public class RecipeGraph implements DataDelegate {
 		boolean cleared() { return clear; }
 	}
 
-	private class Recipe {
+	private final class Recipe {
 		private HashMap<RecipeItem, Integer> products;
 		private HashMap<RecipeItem, Integer> components;
 
@@ -116,34 +122,31 @@ public class RecipeGraph implements DataDelegate {
 		}
 
 		public void addProduct(RecipeItem prod, int yield) {
-			components.put(prod, yield);
+			products.put(prod, yield);
 		}
 		public void addComponent(RecipeItem comp, int amount) {
 			components.put(comp, amount);
 		}
 	}
 
-	private class RecipeItem {
-		String cargoType;
+	private final class RecipeItem {
+		private Cargo cargo;
 
-		RecipeItem(String cargoType) {
-			this.cargoType = cargoType;
-		}
+		RecipeItem(Cargo cargo) { this.cargo = cargo; }
+		RecipeItem(String cargoName) { this.cargo = cargoes.getCargoByCID(cargoName); }
+		RecipeItem(int c_id) { this.cargo = cargoes.getCargoByCID(c_id); }
 
-		public String getCargoType() { return cargoType; }
-		public void setCargoType(String cargoType) { this.cargoType = cargoType; }
+		Cargo getCargo() { return cargo; }
 
 		@Override
 		public boolean equals(Object o) {
 			if (this == o) return true;
 			if (o == null || getClass() != o.getClass()) return false;
 			RecipeItem that = (RecipeItem) o;
-			return Objects.equals(cargoType, that.cargoType);
+			return cargo.equals(that.cargo);
 		}
 
 		@Override
-		public int hashCode() {
-			return cargoType.hashCode();
-		}
+		public int hashCode() { return cargo.hashCode(); }
 	}
 }
