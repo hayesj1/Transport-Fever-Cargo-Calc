@@ -1,12 +1,15 @@
 package com.tigerbird1.TpFCargoCalc.ui;
 
-import com.tigerbird1.TpFCargoCalc.Cargo;
 import com.tigerbird1.TpFCargoCalc.Utils;
-import com.tigerbird1.TpFCargoCalc.io.Cargoes;
-import com.tigerbird1.TpFCargoCalc.io.RecipeGraph;
+import com.tigerbird1.TpFCargoCalc.cargo.Cargo;
+import com.tigerbird1.TpFCargoCalc.cargo.Cargoes;
+import com.tigerbird1.TpFCargoCalc.cargo.RecipeGraph;
 
 import javax.swing.*;
-import javax.swing.tree.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;

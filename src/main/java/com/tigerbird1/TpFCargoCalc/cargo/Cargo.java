@@ -1,6 +1,5 @@
-package com.tigerbird1.TpFCargoCalc;
+package com.tigerbird1.TpFCargoCalc.cargo;
 
-import java.util.Locale;
 import java.util.Objects;
 
 public class Cargo {

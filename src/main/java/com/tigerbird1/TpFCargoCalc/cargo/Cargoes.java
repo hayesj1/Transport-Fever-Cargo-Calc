@@ -1,6 +1,6 @@
-package com.tigerbird1.TpFCargoCalc.io;
+package com.tigerbird1.TpFCargoCalc.cargo;
 
-import com.tigerbird1.TpFCargoCalc.Cargo;
+import com.tigerbird1.TpFCargoCalc.io.DataDelegate;
 import org.xml.sax.Attributes;
 
 import java.util.HashSet;
@@ -42,13 +42,10 @@ public class Cargoes implements DataDelegate {
 				break;
 			case "cargodef":
 				this.cargoes.add(new Cargo(c_id, name.toLowerCase()));
-				System.out.println("Added "+c_id+":"+name+" to list of cargoes");
 				break;
 			default:
 				break;
 		}
-
-		return;
 	}
 
 	@Override
@@ -64,7 +61,6 @@ public class Cargoes implements DataDelegate {
 		for (Cargo tmp : cargoes) {
 			if (c_id == tmp.getCID()) { return tmp; }
 		}
-
 		return Cargo.NIL_CARGO;
 	}
 	public Cargo getCargoByName(String name) {
@@ -72,7 +68,6 @@ public class Cargoes implements DataDelegate {
 		for (Cargo tmp : cargoes) {
 			if (name.equals(tmp.getName())) { return tmp; }
 		}
-
 		return Cargo.NIL_CARGO;
 	}
 

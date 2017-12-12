@@ -1,6 +1,6 @@
 package com.tigerbird1.TpFCargoCalc.io;
 
-import org.xml.sax.*;
+import org.xml.sax.Attributes;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,26 +17,25 @@ public class DataHandler extends XMLEventHandler {
 	public void addDelegate(DataDelegate del) { dataDels.add(del); }
 
 	@Override
-	public void startDocument() throws SAXException {
+	public void startDocument() {
 		dataDels.forEach(DataDelegate::initialize);
 	}
 
 	@Override
-	public void endDocument() throws SAXException {
+	public void endDocument() {
 		dataDels.forEach(DataDelegate::completed);
 	}
 
 	@Override
-	public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
+	public void startElement(String uri, String localName, String qName, Attributes atts) {
 		if (!"".equals(uri)) {
 			dataDels.forEach( del -> del.receiveData(uri+"."+localName, atts));
 		} else {
 			dataDels.forEach( del -> del.receiveData(qName, atts));
 		}
-
-		//System.out.printf("%s\n",qName);
 	}
 
 	@Override
-	public void characters(char[] ch, int start, int length) throws SAXException {}
+	public void characters(char[] ch, int start, int length) {
+	}
 }

@@ -1,9 +1,10 @@
-package com.tigerbird1.TpFCargoCalc.io;
+package com.tigerbird1.TpFCargoCalc.cargo;
 
-import com.tigerbird1.TpFCargoCalc.Cargo;
+import com.tigerbird1.TpFCargoCalc.io.DataDelegate;
 import org.xml.sax.Attributes;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
 
 public final class RecipeGraph implements DataDelegate {
 	private HashMap<Cargo, RecipeItem> vertices;

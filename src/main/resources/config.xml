@@ -1,2 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<config></config>
+<config>
+	<option type="String" name="gs_modifier" value="1.0x"/>
+	<option type="float" name="wps_tolerance" value="0.125"/>
+</config>

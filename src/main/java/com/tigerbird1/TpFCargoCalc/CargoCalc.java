@@ -1,13 +1,12 @@
 package com.tigerbird1.TpFCargoCalc;
 
+import com.tigerbird1.TpFCargoCalc.cargo.Cargoes;
+import com.tigerbird1.TpFCargoCalc.cargo.RecipeGraph;
+import com.tigerbird1.TpFCargoCalc.config.Configuration;
 import com.tigerbird1.TpFCargoCalc.io.AppIO;
-import com.tigerbird1.TpFCargoCalc.io.Cargoes;
-import com.tigerbird1.TpFCargoCalc.io.RecipeGraph;
 import com.tigerbird1.TpFCargoCalc.ui.CargoCalcUI;
 
 import javax.swing.*;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -18,25 +17,28 @@ public class CargoCalc {
 
 	private Cargoes cargoes;
 	private RecipeGraph recipes;
+	private Configuration config;
 
 
 	public static void main(String[] args) {
-		InputStream config_file = null;
-		InputStream data_file = null;
-
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-
-			Class loader = System.class;
-			config_file = loader.getResource("/config.xml").openStream();
-			data_file = loader.getResource("/cargo_data.xml").openStream();
-		} catch (ClassNotFoundException | UnsupportedLookAndFeelException | IllegalAccessException | InstantiationException | NullPointerException | IOException e) {
-			e.printStackTrace();
+		} catch (UnsupportedLookAndFeelException | IllegalAccessException | InstantiationException | ClassNotFoundException ignored) {
 		}
 
+		Class loader = System.class;
 		CargoCalc cc = new CargoCalc();
-		Configuration config = cc.appIO.readConfig(config_file);
-		cc.appIO.readCargoData(data_file);
+
+		try (InputStream config_file = loader.getResource("/config.xml").openStream()) {
+			cc.config = cc.appIO.readConfig(config_file);
+		} catch (NullPointerException | IOException e) {
+			e.printStackTrace();
+		}
+		try (InputStream data_file = loader.getResource("/cargo_data.xml").openStream()) {
+			cc.appIO.readCargoData(data_file);
+		} catch (NullPointerException | IOException e) {
+			e.printStackTrace();
+		}
 
 		cc.cargoes = cc.appIO.getCargoes();
 		cc.recipes = cc.appIO.getRecipes();
@@ -54,7 +56,7 @@ public class CargoCalc {
 				Thread.currentThread().interrupt();
 			}
 		}
-		cc.appIO.saveConfig(config);
+		cc.appIO.saveConfig();
 
 		return;
 	}

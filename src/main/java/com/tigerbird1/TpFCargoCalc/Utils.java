@@ -1,11 +1,20 @@
 package com.tigerbird1.TpFCargoCalc;
 
+import com.tigerbird1.TpFCargoCalc.config.Configuration;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class Utils {
+	private static Configuration config = Configuration.getInstance();
+
+
 	public static boolean epsilonEquals(float f1, float f2) {
-		return Math.abs(f1 - f2) <= 0.3; //TODO: Use User-configured epsilon
+		try {
+			return Math.abs(f1 - f2) <= config.getFloat("wps_tolerance");
+		} catch (NoSuchFieldException | IllegalAccessException ignored) {
+			return false;
+		}
 	}
 
 	public static void showNoCargoSelectedError(Component parent) {

@@ -1,10 +1,16 @@
 package com.tigerbird1.TpFCargoCalc.io;
 
-import com.tigerbird1.TpFCargoCalc.Configuration;
-import org.xml.sax.*;
+import com.tigerbird1.TpFCargoCalc.cargo.Cargoes;
+import com.tigerbird1.TpFCargoCalc.cargo.RecipeGraph;
+import com.tigerbird1.TpFCargoCalc.config.ConfigHandler;
+import com.tigerbird1.TpFCargoCalc.config.Configuration;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 
 
 public class AppIO {
@@ -48,7 +54,7 @@ public class AppIO {
 		return config.getConfiguration();
 	}
 
-	public void saveConfig(Configuration configuration) {
+	public void saveConfig() {
 		//TODO save configuration
 		return;
 	}
@@ -64,7 +70,6 @@ public class AppIO {
 	public Cargoes getCargoes() {
 		return cargoes;
 	}
-
 	public RecipeGraph getRecipes() {
 		return recipes;
 	}
