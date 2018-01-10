@@ -11,14 +11,19 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class CargoCalc {
+	private static Utils utils;
 
 	private AppIO appIO = new AppIO();
 	private CargoCalcUI ui;
 
 	private Cargoes cargoes;
 	private RecipeGraph recipes;
+
 	private Configuration config;
 
+	public static Utils getUtils() {
+		return utils;
+	}
 
 	public static void main(String[] args) {
 		try {
@@ -43,9 +48,10 @@ public class CargoCalc {
 		cc.cargoes = cc.appIO.getCargoes();
 		cc.recipes = cc.appIO.getRecipes();
 
+		utils = new Utils(cc.cargoes);
+
 		cc.ui = new CargoCalcUI();
 		cc.ui.setRecicpeGraph(cc.recipes);
-		cc.ui.setCargoes(cc.cargoes);
 
 		cc.ui.setVisible(true);
 

@@ -1,5 +1,7 @@
 package com.tigerbird1.TpFCargoCalc;
 
+import com.tigerbird1.TpFCargoCalc.cargo.Cargo;
+import com.tigerbird1.TpFCargoCalc.cargo.Cargoes;
 import com.tigerbird1.TpFCargoCalc.config.Configuration;
 
 import javax.swing.*;
@@ -8,6 +10,27 @@ import java.awt.*;
 public class Utils {
 	private static Configuration config = Configuration.getInstance();
 
+	private Cargoes cargoes;
+	private DefaultComboBoxModel<Cargo> cargoChooserModel = new DefaultComboBoxModel<>();
+
+	public Utils(Cargoes cargoes) {
+		this.cargoes = cargoes;
+		for (Cargo c : this.cargoes.getCargoes()) {
+			this.cargoChooserModel.addElement(c);
+		}
+	}
+
+	public Cargoes getCargoes() {
+		return cargoes;
+	}
+
+	public void setCargoes(Cargoes cargoes) {
+		this.cargoes = cargoes;
+		this.cargoChooserModel.removeAllElements();
+		for (Cargo c : this.cargoes.getCargoes()) {
+			this.cargoChooserModel.addElement(c);
+		}
+	}
 
 	public static boolean epsilonEquals(float f1, float f2) {
 		try {
@@ -33,5 +56,9 @@ public class Utils {
 
 	public static void showChainsValidInfo(Component parent) {
 		JOptionPane.showMessageDialog(parent, "Chains are valid and optimized!", "Chains Valid and Optimized".toLowerCase(), JOptionPane.INFORMATION_MESSAGE);
+	}
+
+	public DefaultComboBoxModel<Cargo> getCargoChooserModel() {
+		return cargoChooserModel;
 	}
 }
