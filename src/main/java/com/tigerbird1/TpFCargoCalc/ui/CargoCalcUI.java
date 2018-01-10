@@ -1,5 +1,6 @@
 package com.tigerbird1.TpFCargoCalc.ui;
 
+import com.tigerbird1.TpFCargoCalc.CargoCalc;
 import com.tigerbird1.TpFCargoCalc.Utils;
 import com.tigerbird1.TpFCargoCalc.cargo.Cargo;
 import com.tigerbird1.TpFCargoCalc.cargo.Cargoes;
@@ -7,54 +8,46 @@ import com.tigerbird1.TpFCargoCalc.cargo.RecipeGraph;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
-import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
 public class CargoCalcUI {
 	private JFrame frame;
 	private JPanel contentPane;
+	private JTabbedPane legPane;
+
 	private JTextField frequency;
 	private JTextField capacity;
-	private JButton addLeg;
-	private JButton addCity;
 	private JSlider nVehicles;
-	private JTree legs;
 	private JLabel nVehiclesLabel;
 	private JComboBox<Cargo> cargoChooser;
-	private JButton moveNodeU;
-	private JButton moveNodeD;
+
 	private JButton editSettings;
-	private JButton addChain;
 	private JButton validate;
-	private JButton deleteNode;
-	private JButton addLabel;
+
+	private JButton moveItemU;
+	private JButton moveItemD;
+
+	private JButton addTier;
+	private JButton addChain;
+	private JButton addCity;
+	private JButton addLeg;
+	private JButton deleteItem;
+	private JButton addItemLabel;
 
 	private CityDialog cityDialog;
 	private DefaultComboBoxModel<Cargo> cargoChooserModel;
-	private DefaultMutableTreeNode root;
-	private DefaultTreeModel treeModel;
+	private ArrayList<TierPane> tierPanes = new ArrayList<>(4);
 
 	private RecipeGraph recipeGraph;
 	private Cargoes cargoes;
-	private int chainCnt = 1;
 
 	public CargoCalcUI() {
 		$$$setupUI$$$();
-		addLeg.addActionListener(e -> addLeg());
-		addCity.addActionListener(e -> addCity());
-
-		moveNodeU.addActionListener(e -> moveNode(true));
-		moveNodeD.addActionListener(e -> moveNode(false));
-
-		nVehicles.addChangeListener(e -> nVehiclesLabel.setText("Vehicle(s): " + nVehicles.getValue()));
-
-		// call onCancel() on ESCAPE
-		contentPane.registerKeyboardAction(e -> onClose(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
 		this.frame = new JFrame("Cargo Calc");
 		this.frame.setContentPane(this.contentPane);
@@ -67,20 +60,25 @@ public class CargoCalcUI {
 				onClose();
 			}
 		});
-		addChain.addActionListener(e -> treeModel.insertNodeInto(new DefaultMutableTreeNode("Chain " + ( chainCnt++ )), root, root.getChildCount()));
-		deleteNode.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				deleteNode();
+		// call onClose() on ESCAPE
+		contentPane.registerKeyboardAction(e -> onClose(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+		addTier.addActionListener(e -> addTier());
+		addChain.addActionListener(e -> ( (TierPane) legPane.getComponentAt(legPane.getSelectedIndex()) ).addChain());
+		addCity.addActionListener(e -> ( (TierPane) legPane.getComponentAt(legPane.getSelectedIndex()) ).addCityRoute(getCityName(), getCityCargo(), getCityStats()));
+		addLeg.addActionListener(e -> addLeg((TierPane) legPane.getComponentAt(legPane.getSelectedIndex())));
+		//moveItemU.addActionListener(e -> moveNode(true));
+		//moveItemD.addActionListener(e -> moveNode(false));
+		//deleteItem.addActionListener(e -> deleteNode());
+		validate.addActionListener(e -> {
+			if (validateChains()) {
+				Utils.showChainsValidInfo(frame);
+			} else {
+				Utils.showChainsUnoptimzedWarning(frame);
 			}
 		});
-		validate.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (validateChains()) { Utils.showChainsValidInfo(frame); }
-				else { Utils.showChainsUnoptimzedWarning(frame); }
-			}
-		});
+
+		nVehicles.addChangeListener(e -> nVehiclesLabel.setText("Vehicle(s): " + nVehicles.getValue()));
 	}
 
 	private void onClose() {
@@ -88,24 +86,20 @@ public class CargoCalcUI {
 	}
 
 	private void createUIComponents() {
-		cityDialog = new CityDialog(this.frame);
-
-		cargoChooserModel = new DefaultComboBoxModel<>();
+		cargoChooserModel = CargoCalc.getUtils().getCargoChooserModel();
 		cargoChooser = new JComboBox<>(cargoChooserModel);
 
+		legPane = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.WRAP_TAB_LAYOUT);
+		addTier();
+		//legList.setEditable(true);
 
-		root = new DefaultMutableTreeNode("Root");
-		treeModel = new DefaultTreeModel(root);
-		treeModel.insertNodeInto(new DefaultMutableTreeNode("Chain " + ( chainCnt++ )), root, root.getChildCount());
-		legs = new JTree(treeModel);
-		legs.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-		legs.setEditable(true);
-
+		cityDialog = new CityDialog(this.frame);
 	}
 
+	/*
 	private DefaultMutableTreeNode addNode(Object child) {
 		DefaultMutableTreeNode parentNode;
-		TreePath parentPath = legs.getSelectionPath();
+		TreePath parentPath = legList.getSelectionPath();
 
 		if (parentPath == null) { //There is no selection. Default to the root node.
 			parentNode = (DefaultMutableTreeNode) root.getFirstChild();
@@ -114,21 +108,27 @@ public class CargoCalcUI {
 		}
 
 		return addNode(parentNode, child, true);
+		return null;
 	}
+	*/
 
+	/*
 	private DefaultMutableTreeNode addNode(DefaultMutableTreeNode parent, Object child, boolean shouldBeVisible) {
 		DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(child);
-		treeModel.insertNodeInto(childNode, parent, parent.getChildCount());
+		listModel.insertNodeInto(childNode, parent, parent.getChildCount());
 
 		//Make sure the user can see the new node.
 		if (shouldBeVisible) {
-			legs.scrollPathToVisible(new TreePath(childNode.getPath()));
+			legList.scrollPathToVisible(new TreePath(childNode.getPath()));
 		}
 		return childNode;
+		return null;
 	}
+	*/
 
+	/*
 	private void moveNode(boolean moveUp) {
-		TreePath path = legs.getSelectionPath();
+		TreePath path = legList.getSelectionPath();
 		if (path == null) { //There is no selection. Default to the root node.
 			return;
 		}
@@ -139,9 +139,11 @@ public class CargoCalcUI {
 
 		moveNode(node, moveUp);
 		TreePath newPath = new TreePath(node.getPath());
-		legs.setSelectionPath(newPath);
+		legList.setSelectionPath(newPath);
 	}
+	*/
 
+	/*
 	private void moveNode(DefaultMutableTreeNode node, boolean moveUp) {
 		DefaultMutableTreeNode parent = (DefaultMutableTreeNode) node.getParent();
 		DefaultMutableTreeNode other = ( moveUp ) ? node.getPreviousSibling() : node.getNextSibling();
@@ -184,40 +186,48 @@ public class CargoCalcUI {
 				parent = newParent;
 			}
 
-			treeModel.removeNodeFromParent(node);
-			treeModel.insertNodeInto(node, parent, newIdx);
+			listModel.removeNodeFromParent(node);
+			listModel.insertNodeInto(node, parent, newIdx);
 		} catch (NullPointerException | IllegalArgumentException ignored) {
 		}
 	}
+	*/
 
+	/*
 	private void deleteNode() {
-		TreePath path = legs.getSelectionPath();
+		TreePath path = legList.getSelectionPath();
 		if (path == null) { //There is no selection. Default to the root node.
 			return;
 		}
 		DefaultMutableTreeNode node = (DefaultMutableTreeNode) ( path.getLastPathComponent() );
-		treeModel.removeNodeFromParent(node);
+		listModel.removeNodeFromParent(node);
+	}
+	*/
+
+
+	private void addTier() {
+		TierPane newTier = new TierPane();
+		newTier.addListSelectionListener(e -> setListItemControlsEnabled(( (JList) e.getSource() ).getSelectedIndex() != -1));
+		newTier.setParentPane(legPane);
+
 	}
 
-	private void addLeg() {
+	private void addLeg(TierPane selectedPane) {
 		if (cargoChooser.getSelectedIndex() == -1) {
 			Utils.showNoCargoSelectedError(this.frame);
 		} else {
-			String legStr = getLegString();
-			addNode(legStr);
+			Cargo cargo = ( (Cargo) cargoChooser.getSelectedItem() );
+			int freq = computeFrequency();
+			int cap = Integer.valueOf(capacity.getText());
+			int nVehicles = this.nVehicles.getValue();
+			selectedPane.addLegRoute(cargo.toString(), cargo, new int[] { cap, freq, nVehicles });
+
+			//float waresPerSecond = cap / ( freq * nVehicles );
+			//return cargo + "\t" + waresPerSecond + " -- " + cap + "\t" + freq + "\t" + nVehicles;
 		}
 	}
 
-	private String getLegString() {
-		Cargo cargo = ( (Cargo) cargoChooser.getSelectedItem() );
-		int freq = getFrequency();
-		float cap = Float.valueOf(capacity.getText());
-		int nVehicles = this.nVehicles.getValue();
-		float waresPerSecond = cap / ( freq * nVehicles );
-		return cargo + "--" + waresPerSecond + ':' + cap + "--" + freq + "--" + nVehicles;
-	}
-
-	private int getFrequency() {
+	private int computeFrequency() {
 		String text = frequency.getText();
 		String[] tmp = text.split(":");
 		int minutes = Integer.valueOf(tmp[0]);
@@ -225,24 +235,7 @@ public class CargoCalcUI {
 		return minutes * 60 + seconds;
 	}
 
-	private void addCity() {
-		TreePath path = legs.getSelectionPath();
-		DefaultMutableTreeNode parent;
-		DefaultMutableTreeNode lastPathComponent = (DefaultMutableTreeNode) ( ( path != null ) ? path.getLastPathComponent() : null );
-		if (lastPathComponent == null || !( (String) lastPathComponent.getUserObject() ).toLowerCase().contains("chain")) {
-			Utils.showNoChainSelectedError(this.frame);
-			return;
-		} else {
-			parent = lastPathComponent;
-		}
-
-		String label = createCityString();
-		if (label == null) { return; }
-
-		addNode(parent, label, true);
-	}
-
-	private String createCityString() {
+	private String buildCityString() {
 		cityDialog.setVisible(true);
 
 		if (!cityDialog.areValuesReady()) {
@@ -250,22 +243,47 @@ public class CargoCalcUI {
 		}
 		cityDialog.setVisible(false);
 		Cargo cargo = cityDialog.getCargo();
-		float cap = cityDialog.getCapacity();
+		int cap = cityDialog.getCapacity();
 		float waresPerSecond = cityDialog.getWaresPerSecond();
 		String cityName = cityDialog.getCityName();
-		String label = ( cityName.length() > 0 ? cityName + "--" + waresPerSecond + ":" : waresPerSecond + "--" ) + cargo + "--" + cap;
+		String label = ( cityName.length() > 0 ? cityName + "\t" + waresPerSecond + " -- " : waresPerSecond + " -- " ) + cargo + "\t" + cap;
 		return label;
 	}
 
+	private String getCityName() {
+		checkValuesReady();
+		return cityDialog.getCityName();
+	}
+
+	private Cargo getCityCargo() {
+		checkValuesReady();
+		return cityDialog.getCargo();
+	}
+
+	private int[] getCityStats() {
+		checkValuesReady();
+		return new int[] { cityDialog.getCapacity(), cityDialog.getFrequency() };
+	}
+
+	private void checkValuesReady() {
+		if (cityDialog.areValuesReady()) {
+			return;
+		} else if (cityDialog.isShowing()) {
+			throw new DialogResultsNotReadyException(cityDialog);
+		} else {
+			cityDialog.setVisible(true);
+		}
+	}
+
 	public boolean validateChains() {
-		Enumeration enume = root.children();
+		/*Enumeration enume = root.children();
 		while (enume.hasMoreElements()) {
 			DefaultMutableTreeNode chain = (DefaultMutableTreeNode) enume.nextElement();
 			if (!validateChain(chain)) {
 				return false;
 			}
 		}
-
+		*/
 		return true;
 	}
 
@@ -281,18 +299,26 @@ public class CargoCalcUI {
 			String[] tmp = childStr.split(":");
 			String[][] vals = new String[2][0];
 
-			for (int i = 0; i < 2; i++) { vals[i] = tmp[i].split("--"); }
+			for (int i = 0; i < 2; i++) {
+				vals[i] = tmp[i].split("--");
+			}
 			Float wps = Float.valueOf(vals[0][1]);
 			if (vals[1].length == 2) {
 				waresPerSecondCities.add(wps);
 			} else {
 				waresPerSecondFactories.add(wps);
-				if (!validateSubTree(child, wps)) { return false; }
+				if (!validateSubTree(child, wps)) {
+					return false;
+				}
 			}
 		}
 		float aggregatedCityWPS = 0.0f, aggregatedFactoryWPS = 0.0f;
-		for (Float f : waresPerSecondFactories) { aggregatedFactoryWPS += f; }
-		for (Float f : waresPerSecondCities) { aggregatedCityWPS += f; }
+		for (Float f : waresPerSecondFactories) {
+			aggregatedFactoryWPS += f;
+		}
+		for (Float f : waresPerSecondCities) {
+			aggregatedCityWPS += f;
+		}
 
 		return Utils.epsilonEquals(aggregatedCityWPS, aggregatedFactoryWPS);
 	}
@@ -321,17 +347,11 @@ public class CargoCalcUI {
 		return rootWPS >= aggregatedChildrenWPS;
 	}
 
-	public void setCargoes(Cargoes cargoes) {
-		this.cargoes = cargoes;
-		for (Cargo c : this.cargoes.getCargoes()) {
-			this.cargoChooserModel.addElement(c);
-		}
-		this.cargoChooser.setModel(this.cargoChooserModel);
-		this.cityDialog.setCargoChooserModel(this.cargoChooserModel);
-	}
-
-	public void setRecicpeGraph(RecipeGraph graph) {
-		this.recipeGraph = graph;
+	public void setListItemControlsEnabled(boolean flag) {
+		moveItemU.setEnabled(flag);
+		moveItemD.setEnabled(flag);
+		deleteItem.setEnabled(flag);
+		addItemLabel.setEnabled(flag);
 	}
 
 	public void setVisible(boolean flag) {
@@ -340,6 +360,10 @@ public class CargoCalcUI {
 
 	public boolean isShowing() {
 		return this.frame.isShowing();
+	}
+
+	public void setRecicpeGraph(RecipeGraph graph) {
+		this.recipeGraph = graph;
 	}
 
 	/**
@@ -352,38 +376,30 @@ public class CargoCalcUI {
 	private void $$$setupUI$$$() {
 		createUIComponents();
 		contentPane = new JPanel();
-		contentPane.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(10, 5, new Insets(16, 16, 16, 16), -1, -1));
+		contentPane.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(2, 2, new Insets(16, 16, 16, 16), -1, -1));
 		contentPane.putClientProperty("html.disable", Boolean.TRUE);
+		final JPanel panel1 = new JPanel();
+		panel1.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(2, 4, new Insets(0, 0, 0, 0), -1, -1));
+		contentPane.add(panel1, new com.intellij.uiDesigner.core.GridConstraints(1, 0, 1, 2, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, true));
 		capacity = new JTextField();
-		capacity.setText("1.0");
+		capacity.setText("10");
+		capacity.setToolTipText("Combined capacity of all vehicles on the route");
 		capacity.putClientProperty("html.disable", Boolean.TRUE);
-		contentPane.add(capacity, new com.intellij.uiDesigner.core.GridConstraints(9, 2, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+		panel1.add(capacity, new com.intellij.uiDesigner.core.GridConstraints(1, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
 		final JLabel label1 = new JLabel();
 		label1.setText("Capacity");
 		label1.putClientProperty("html.disable", Boolean.TRUE);
-		contentPane.add(label1, new com.intellij.uiDesigner.core.GridConstraints(8, 2, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-		legs.setAutoscrolls(false);
-		legs.setDragEnabled(true);
-		legs.setDropMode(DropMode.INSERT);
-		legs.setEditable(true);
-		legs.setEnabled(true);
-		legs.setRootVisible(false);
-		legs.setShowsRootHandles(true);
-		legs.setToolTipText("Legs");
-		legs.setVisible(true);
-		legs.putClientProperty("JTree.lineStyle", "");
-		legs.putClientProperty("html.disable", Boolean.TRUE);
-		contentPane.add(legs, new com.intellij.uiDesigner.core.GridConstraints(0, 2, 8, 3, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(20, 60), new Dimension(20, 60), null, 0, false));
+		panel1.add(label1, new com.intellij.uiDesigner.core.GridConstraints(0, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		final JLabel label2 = new JLabel();
 		label2.setText("Frequency (mins:secs)");
-		contentPane.add(label2, new com.intellij.uiDesigner.core.GridConstraints(8, 3, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		panel1.add(label2, new com.intellij.uiDesigner.core.GridConstraints(0, 2, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		frequency = new JTextField();
 		frequency.setText("0:1");
 		frequency.putClientProperty("html.disable", Boolean.TRUE);
-		contentPane.add(frequency, new com.intellij.uiDesigner.core.GridConstraints(9, 3, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+		panel1.add(frequency, new com.intellij.uiDesigner.core.GridConstraints(1, 2, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
 		nVehiclesLabel = new JLabel();
 		nVehiclesLabel.setText("Vehicle(s): ");
-		contentPane.add(nVehiclesLabel, new com.intellij.uiDesigner.core.GridConstraints(8, 4, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		panel1.add(nVehiclesLabel, new com.intellij.uiDesigner.core.GridConstraints(0, 3, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		nVehicles = new JSlider();
 		nVehicles.setExtent(0);
 		nVehicles.setInverted(false);
@@ -400,51 +416,62 @@ public class CargoCalcUI {
 		nVehicles.putClientProperty("JSlider.isFilled", Boolean.FALSE);
 		nVehicles.putClientProperty("Slider.paintThumbArrowShape", Boolean.TRUE);
 		nVehicles.putClientProperty("html.disable", Boolean.TRUE);
-		contentPane.add(nVehicles, new com.intellij.uiDesigner.core.GridConstraints(9, 4, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-		addLeg = new JButton();
-		addLeg.setText("+ Leg");
-		addLeg.setToolTipText("Add leg");
-		contentPane.add(addLeg, new com.intellij.uiDesigner.core.GridConstraints(8, 0, 2, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-		editSettings = new JButton();
-		editSettings.setEnabled(false);
-		editSettings.setText("Settings");
-		contentPane.add(editSettings, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-		moveNodeU = new JButton();
-		moveNodeU.setText("Move up");
-		contentPane.add(moveNodeU, new com.intellij.uiDesigner.core.GridConstraints(0, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-		contentPane.add(cargoChooser, new com.intellij.uiDesigner.core.GridConstraints(9, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-		final com.intellij.uiDesigner.core.Spacer spacer1 = new com.intellij.uiDesigner.core.Spacer();
-		contentPane.add(spacer1, new com.intellij.uiDesigner.core.GridConstraints(7, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_VERTICAL, 1, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-		final com.intellij.uiDesigner.core.Spacer spacer2 = new com.intellij.uiDesigner.core.Spacer();
-		contentPane.add(spacer2, new com.intellij.uiDesigner.core.GridConstraints(2, 0, 6, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_VERTICAL, 1, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-		validate = new JButton();
-		validate.setText("Validate");
-		contentPane.add(validate, new com.intellij.uiDesigner.core.GridConstraints(1, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-		moveNodeD = new JButton();
-		moveNodeD.setText("Move down");
-		contentPane.add(moveNodeD, new com.intellij.uiDesigner.core.GridConstraints(1, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		panel1.add(nVehicles, new com.intellij.uiDesigner.core.GridConstraints(1, 3, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		panel1.add(cargoChooser, new com.intellij.uiDesigner.core.GridConstraints(1, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		final JLabel label3 = new JLabel();
 		label3.setText("Choose Cargo");
-		contentPane.add(label3, new com.intellij.uiDesigner.core.GridConstraints(8, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-		final com.intellij.uiDesigner.core.Spacer spacer3 = new com.intellij.uiDesigner.core.Spacer();
-		contentPane.add(spacer3, new com.intellij.uiDesigner.core.GridConstraints(2, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_VERTICAL, 1, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-		deleteNode = new JButton();
-		deleteNode.setText("X");
-		deleteNode.setToolTipText("Delete selection");
-		contentPane.add(deleteNode, new com.intellij.uiDesigner.core.GridConstraints(5, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-		addChain = new JButton();
-		addChain.setText("+ Chain");
-		addChain.setToolTipText("Add new chain");
-		contentPane.add(addChain, new com.intellij.uiDesigner.core.GridConstraints(3, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		panel1.add(label3, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		final JPanel panel2 = new JPanel();
+		panel2.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(13, 1, new Insets(0, 0, 0, 0), -1, -1));
+		contentPane.add(panel2, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+		moveItemU = new JButton();
+		moveItemU.setEnabled(false);
+		moveItemU.setText("Move up");
+		panel2.add(moveItemU, new com.intellij.uiDesigner.core.GridConstraints(3, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(120, -1), null, 0, false));
+		final com.intellij.uiDesigner.core.Spacer spacer1 = new com.intellij.uiDesigner.core.Spacer();
+		panel2.add(spacer1, new com.intellij.uiDesigner.core.GridConstraints(12, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_VERTICAL, 1, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+		moveItemD = new JButton();
+		moveItemD.setEnabled(false);
+		moveItemD.setText("Move down");
+		panel2.add(moveItemD, new com.intellij.uiDesigner.core.GridConstraints(4, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(120, -1), null, 0, false));
+		final com.intellij.uiDesigner.core.Spacer spacer2 = new com.intellij.uiDesigner.core.Spacer();
+		panel2.add(spacer2, new com.intellij.uiDesigner.core.GridConstraints(5, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_VERTICAL, 1, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+		deleteItem = new JButton();
+		deleteItem.setEnabled(false);
+		deleteItem.setText("X");
+		deleteItem.setToolTipText("Delete selection");
+		panel2.add(deleteItem, new com.intellij.uiDesigner.core.GridConstraints(10, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(120, -1), null, 0, false));
 		addCity = new JButton();
 		addCity.setText("+ City");
 		addCity.setToolTipText("Add City");
-		contentPane.add(addCity, new com.intellij.uiDesigner.core.GridConstraints(4, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-		addLabel = new JButton();
-		addLabel.setEnabled(false);
-		addLabel.setText("Label As");
-		addLabel.setToolTipText("Label Selection");
-		contentPane.add(addLabel, new com.intellij.uiDesigner.core.GridConstraints(6, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		panel2.add(addCity, new com.intellij.uiDesigner.core.GridConstraints(8, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(120, -1), null, 0, false));
+		addItemLabel = new JButton();
+		addItemLabel.setEnabled(false);
+		addItemLabel.setText("Label As");
+		addItemLabel.setToolTipText("Label Selection");
+		panel2.add(addItemLabel, new com.intellij.uiDesigner.core.GridConstraints(11, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(120, -1), null, 0, false));
+		addTier = new JButton();
+		addTier.setText("+ Tier");
+		addTier.setToolTipText("add an intermediate tier");
+		panel2.add(addTier, new com.intellij.uiDesigner.core.GridConstraints(6, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(120, -1), null, 0, false));
+		addChain = new JButton();
+		addChain.setText("+ Chain");
+		addChain.setToolTipText("Add new chain");
+		panel2.add(addChain, new com.intellij.uiDesigner.core.GridConstraints(7, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(120, -1), null, 0, false));
+		addLeg = new JButton();
+		addLeg.setText("+ Leg");
+		addLeg.setToolTipText("Add leg");
+		panel2.add(addLeg, new com.intellij.uiDesigner.core.GridConstraints(9, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(120, -1), null, 0, false));
+		editSettings = new JButton();
+		editSettings.setEnabled(false);
+		editSettings.setText("Settings");
+		panel2.add(editSettings, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(120, -1), null, 0, false));
+		validate = new JButton();
+		validate.setText("Validate");
+		panel2.add(validate, new com.intellij.uiDesigner.core.GridConstraints(1, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(120, -1), null, 0, false));
+		final com.intellij.uiDesigner.core.Spacer spacer3 = new com.intellij.uiDesigner.core.Spacer();
+		panel2.add(spacer3, new com.intellij.uiDesigner.core.GridConstraints(2, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_VERTICAL, 1, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+		contentPane.add(legPane, new com.intellij.uiDesigner.core.GridConstraints(0, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(240, 480), null, 0, false));
 		label1.setLabelFor(capacity);
 		label2.setLabelFor(frequency);
 		label3.setLabelFor(cargoChooser);
@@ -455,5 +482,23 @@ public class CargoCalcUI {
 	 */
 	public JComponent $$$getRootComponent$$$() {
 		return contentPane;
+	}
+
+	public class DialogResultsNotReadyException extends RuntimeException {
+		private JDialog dialog = null;
+
+		public DialogResultsNotReadyException() {
+			this("Dialog results are not ready to be used or are invalid!", null);
+		}
+
+		public DialogResultsNotReadyException(JDialog dialog) {
+			this();
+			this.dialog = dialog;
+		}
+
+		public DialogResultsNotReadyException(String message, JDialog dialog) {
+			super(message);
+			this.dialog = dialog;
+		}
 	}
 }

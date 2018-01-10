@@ -1,5 +1,6 @@
 package com.tigerbird1.TpFCargoCalc.ui;
 
+import com.tigerbird1.TpFCargoCalc.CargoCalc;
 import com.tigerbird1.TpFCargoCalc.Utils;
 import com.tigerbird1.TpFCargoCalc.cargo.Cargo;
 import com.tigerbird1.TpFCargoCalc.cargo.Cargoes;
@@ -7,7 +8,10 @@ import com.tigerbird1.TpFCargoCalc.config.Configuration;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class CityDialog extends JDialog {
 	private JPanel contentPane;
@@ -32,8 +36,8 @@ public class CityDialog extends JDialog {
 	private final float[] gsSpeeds = new float[] { 0.5f, 1.0f, 2.0f, 4.0f };
 
 	private boolean valuesReady = false;
-	private Cargo cargo = Cargo.NIL_CARGO;
-	private float capacity = -1.0f;
+	private Cargo cargo;
+	private int capacity = -1;
 	private float waresPerSecond = -1.0f;
 
 	public CityDialog() {
@@ -44,9 +48,15 @@ public class CityDialog extends JDialog {
 		super(parent);
 
 		$$$setupUI$$$();
+		Dimension size = new Dimension(700, 150);
+		contentPane.setMinimumSize(size);
+		contentPane.setPreferredSize(size);
+		contentPane.setMaximumSize(size);
 		setContentPane(contentPane);
 		setModal(true);
+
 		getRootPane().setDefaultButton(buttonOK);
+		setTitle("Add City Route");
 
 		gs2xFaster.setMnemonic(0);
 		gsNormal.setMnemonic(1);
@@ -79,26 +89,22 @@ public class CityDialog extends JDialog {
 		gs2xSlower.addActionListener(gsListener);
 		gs4xSlower.addActionListener(gsListener);
 
+		if (cargoChooser.getSelectedIndex() == -1) {
+			cargoChooser.setSelectedItem(cargoChooserModel.getElementAt(0));
+			cargo = (Cargo) cargoChooserModel.getSelectedItem();
+		}
+
 		buttonOK.addActionListener(e -> onOK());
 		buttonCancel.addActionListener(e -> onCancel());
-
+/*
 		cityCapacity.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent e) {
-				if (!cityCapacity.getText().matches("[0-9]+.?[0-9]*")) {
-					capacity = -1.0f;
-					waresPerSecond = -1.0f;
-				} else {
-					//   city capacity       wares/year
-					// ------------------ = -------------- = city capacity = wares/second
-					//  seconds per year     seconds/year
-					capacity = Float.valueOf(cityCapacity.getText());
-					waresPerSecond = capacity / ( ( 12 / gsModifier ) * 60 );
-				}
+				computeWaresPerSecond();
 			}
 		});
-
-		cargoChooser.addItemListener(e -> cargo = (Cargo) e.getItem());
+*/
+		//cargoChooser.addItemListener(e -> cargo = (Cargo) e.getItem());
 
 		// call onCancel() when cross is clicked
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -114,6 +120,21 @@ public class CityDialog extends JDialog {
 		this.pack();
 	}
 
+	private void computeWaresPerSecond() {
+		if (cargoChooser.getSelectedIndex() == -1 || !cityCapacity.getText().matches("[0-9]*.?[0-9]*")) {
+			valuesReady = false;
+			return;
+		} else {
+			//   city capacity       wares/year
+			// ------------------ = -------------- = city capacity = wares/second
+			//  seconds per year     seconds/year
+			capacity = Integer.valueOf(cityCapacity.getText());
+			waresPerSecond = capacity / ( ( 12 * gsModifier ) * 60 );
+			cargo = (Cargo) cargoChooser.getSelectedItem();
+			valuesReady = true;
+		}
+	}
+
 	private void onClose() {
 		String selectedSpeed = gsGrp.getSelection().getActionCommand();
 
@@ -124,7 +145,7 @@ public class CityDialog extends JDialog {
 	}
 
 	private void onOK() {
-		valuesReady = capacity > 0.0f && cargo != null && !cargo.equals(Cargo.NIL_CARGO);
+		computeWaresPerSecond();
 		if (!valuesReady) {
 			if (capacity <= 0.0f) {
 				Utils.showInvalidCapacityError(this);
@@ -132,10 +153,10 @@ public class CityDialog extends JDialog {
 			if (cargo == null || cargo.equals(Cargo.NIL_CARGO)) {
 				Utils.showNoCargoSelectedError(this);
 			}
+		} else {
+			this.onClose();
+			dispose();
 		}
-
-		this.onClose();
-		dispose();
 	}
 
 	private void onCancel() {
@@ -146,7 +167,7 @@ public class CityDialog extends JDialog {
 	}
 
 	private void createUIComponents() {
-		cargoChooserModel = new DefaultComboBoxModel<>();
+		cargoChooserModel = CargoCalc.getUtils().getCargoChooserModel();
 		cargoChooser = new JComboBox<>(cargoChooserModel);
 
 	}
@@ -160,8 +181,12 @@ public class CityDialog extends JDialog {
 		return valuesReady;
 	}
 
-	public float getCapacity() {
+	public int getCapacity() {
 		return this.capacity;
+	}
+
+	public int getFrequency() {
+		return (int) ( ( 12 * gsModifier ) * 60 );
 	}
 
 	public float getWaresPerSecond() {
@@ -254,6 +279,8 @@ public class CityDialog extends JDialog {
 		panel4.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(2, 3, new Insets(0, 0, 0, 0), -1, -1));
 		contentPane.add(panel4, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
 		cityCapacity = new JTextField();
+		cityCapacity.setText("100");
+		cityCapacity.setToolTipText("Quantity of cargo this city accepts in one year");
 		panel4.add(cityCapacity, new com.intellij.uiDesigner.core.GridConstraints(1, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, new Dimension(60, -1), new Dimension(80, 26), new Dimension(120, -1), 0, false));
 		final JLabel label1 = new JLabel();
 		label1.setHorizontalAlignment(0);
@@ -266,6 +293,7 @@ public class CityDialog extends JDialog {
 		panel4.add(label2, new com.intellij.uiDesigner.core.GridConstraints(0, 2, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		panel4.add(cargoChooser, new com.intellij.uiDesigner.core.GridConstraints(1, 2, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		cityName = new JTextField();
+		cityName.setText("Springfield");
 		panel4.add(cityName, new com.intellij.uiDesigner.core.GridConstraints(1, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, new Dimension(120, -1), new Dimension(240, -1), new Dimension(300, -1), 0, false));
 		final JLabel label3 = new JLabel();
 		label3.setHorizontalAlignment(0);
