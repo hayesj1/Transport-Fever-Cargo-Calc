@@ -12,26 +12,24 @@ public class TierPane extends JPanel {
 	private static int tierCount = 1;
 
 	private JTabbedPane parentPane;
-	private JList<JListItem> legList;
+	private JList<TierPaneItem> legList;
 
-	private DefaultListModel<JListItem> legListModel;
+	private DefaultListModel<TierPaneItem> legListModel;
 
 	private int tierN;
 	private int chainCnt = 0;
 	private int cityCnt = 0;
 
-	public TierPane(LayoutManager layout) {
-		this(layout, true);
-	}
-
-	public TierPane(boolean isDoubleBuffered) {
-		this(new FlowLayout(), isDoubleBuffered);
-	}
 
 	public TierPane() {
 		this(true);
 	}
-
+	public TierPane(LayoutManager layout) {
+		this(layout, true);
+	}
+	public TierPane(boolean isDoubleBuffered) {
+		this(new FlowLayout(), isDoubleBuffered);
+	}
 	public TierPane(LayoutManager layout, boolean isDoubleBuffered) {
 		super(layout, isDoubleBuffered);
 
@@ -61,7 +59,6 @@ public class TierPane extends JPanel {
 		this.removeFromParentPane();
 		this.setParentPane(parentPane, newIdx);
 	}
-
 	public void moveTo(JTabbedPane newParentPane, int newIdx) {
 		this.removeFromParentPane();
 		this.setParentPane(newParentPane, newIdx);
@@ -80,11 +77,9 @@ public class TierPane extends JPanel {
 	public void addChain() {
 		addChain("Chain " + ( chainCnt + 1 ));
 	}
-
 	public void addChain(String name) {
 		addChain(name, "");
 	}
-
 	public void addChain(String name, String label) {
 		legListModel.addElement(new Chain(name, label));
 		chainCnt++;
@@ -94,7 +89,6 @@ public class TierPane extends JPanel {
 	public void addCityRoute(Cargo cargo, int[] stats) {
 		addCityRoute("City " + ( cityCnt + 1 ), cargo, stats);
 	}
-
 	public void addCityRoute(String name, Cargo cargo, int[] stats) {
 		//DefaultMutableTreeNode selected = this.legList.getSelectedValue();
 		legListModel.add(legListModel.getSize(), new Route(name, null, true, cargo, stats[0], stats[1], 0));
@@ -109,6 +103,22 @@ public class TierPane extends JPanel {
 	public void addListSelectionListener(ListSelectionListener l) {
 		this.legList.addListSelectionListener(l);
 	}
+
+	public TierPaneItem getSelectedItem() {
+		return legList.getSelectedValue();
+	}
+
+	public void removeItem(TierPaneItem item) {
+		legListModel.removeElement(item);
+	}
+
+	public void moveItem(TierPaneItem item, boolean moveUp) {
+		int old_idx = legListModel.indexOf(item);
+		int swap_idx = old_idx + ( moveUp ? -1 : 1 );
+		TierPaneItem other = legListModel.set(swap_idx, item);
+		legListModel.set(old_idx, other);
+	}
+
 
 	public JTabbedPane getParentPane() {
 		return parentPane;

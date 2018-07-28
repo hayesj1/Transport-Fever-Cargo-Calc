@@ -9,9 +9,7 @@ import com.tigerbird1.TpFCargoCalc.cargo.RecipeGraph;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
@@ -45,6 +43,7 @@ public class CargoCalcUI {
 
 	private RecipeGraph recipeGraph;
 	private Cargoes cargoes;
+	private TierPane selectedTab;
 
 	public CargoCalcUI() {
 		$$$setupUI$$$();
@@ -67,9 +66,17 @@ public class CargoCalcUI {
 		addChain.addActionListener(e -> ( (TierPane) legPane.getComponentAt(legPane.getSelectedIndex()) ).addChain());
 		addCity.addActionListener(e -> ( (TierPane) legPane.getComponentAt(legPane.getSelectedIndex()) ).addCityRoute(getCityName(), getCityCargo(), getCityStats()));
 		addLeg.addActionListener(e -> addLeg((TierPane) legPane.getComponentAt(legPane.getSelectedIndex())));
-		//moveItemU.addActionListener(e -> moveNode(true));
-		//moveItemD.addActionListener(e -> moveNode(false));
-		//deleteItem.addActionListener(e -> deleteNode());
+		moveItemU.addActionListener(e -> moveItem(true));
+		moveItemD.addActionListener(e -> moveItem(false));
+		deleteItem.addActionListener(e -> deleteItem());
+
+		legPane.addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentShown(ComponentEvent e) {
+				selectedTab = (TierPane) e.getComponent();
+			}
+		});
+
 		validate.addActionListener(e -> {
 			if (validateChains()) {
 				Utils.showChainsValidInfo(frame);
@@ -91,119 +98,20 @@ public class CargoCalcUI {
 
 		legPane = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.WRAP_TAB_LAYOUT);
 		addTier();
-		//legList.setEditable(true);
-
+		selectedTab = (TierPane) legPane.getSelectedComponent();
 		cityDialog = new CityDialog(this.frame);
 	}
 
-	/*
-	private DefaultMutableTreeNode addNode(Object child) {
-		DefaultMutableTreeNode parentNode;
-		TreePath parentPath = legList.getSelectionPath();
-
-		if (parentPath == null) { //There is no selection. Default to the root node.
-			parentNode = (DefaultMutableTreeNode) root.getFirstChild();
-		} else {
-			parentNode = (DefaultMutableTreeNode) ( parentPath.getLastPathComponent() );
-		}
-
-		return addNode(parentNode, child, true);
-		return null;
+	private void deleteItem() {
+		TierPane pane = (TierPane) legPane.getSelectedComponent();
+		pane.removeItem(pane.getSelectedItem());
 	}
-	*/
 
-	/*
-	private DefaultMutableTreeNode addNode(DefaultMutableTreeNode parent, Object child, boolean shouldBeVisible) {
-		DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(child);
-		listModel.insertNodeInto(childNode, parent, parent.getChildCount());
-
-		//Make sure the user can see the new node.
-		if (shouldBeVisible) {
-			legList.scrollPathToVisible(new TreePath(childNode.getPath()));
-		}
-		return childNode;
-		return null;
+	private void moveItem(boolean moveUp) {
+		TierPane pane = selectedTab;
+		TierPaneItem item = pane.getSelectedItem();
+		pane.moveItem(item, moveUp);
 	}
-	*/
-
-	/*
-	private void moveNode(boolean moveUp) {
-		TreePath path = legList.getSelectionPath();
-		if (path == null) { //There is no selection. Default to the root node.
-			return;
-		}
-		DefaultMutableTreeNode node = (DefaultMutableTreeNode) ( path.getLastPathComponent() );
-		if (node.equals(root)) {
-			return;
-		}
-
-		moveNode(node, moveUp);
-		TreePath newPath = new TreePath(node.getPath());
-		legList.setSelectionPath(newPath);
-	}
-	*/
-
-	/*
-	private void moveNode(DefaultMutableTreeNode node, boolean moveUp) {
-		DefaultMutableTreeNode parent = (DefaultMutableTreeNode) node.getParent();
-		DefaultMutableTreeNode other = ( moveUp ) ? node.getPreviousSibling() : node.getNextSibling();
-		try {
-			int newIdx = -1;
-			if (other != null) {
-				parent = (DefaultMutableTreeNode) ( ( moveUp ) ? other.getLastLeaf().getParent() : other );
-				newIdx = ( node.getParent().equals(parent) ) ? ( ( moveUp ) ? parent.getIndex(node) - 1 : parent.getIndex(node) + 1 ) : ( ( moveUp ) ? parent.getChildCount() : 0 );
-			} else {
-				DefaultMutableTreeNode newParent;
-				DefaultMutableTreeNode grandParent = (DefaultMutableTreeNode) parent.getParent();
-				if (grandParent == null) {
-					return;
-				}
-
-				if (moveUp) {
-					if (!grandParent.getFirstChild().equals(parent)) {
-						DefaultMutableTreeNode uncle = (DefaultMutableTreeNode) grandParent.getChildBefore(parent);
-						newParent = (DefaultMutableTreeNode) uncle.getLastLeaf().getParent();
-						newIdx = newParent.getChildCount();
-					} else if (grandParent.equals(root)) {
-						return;
-					} else {
-						newParent = grandParent;
-						newIdx = 0;
-					}
-				} else {
-					if (!grandParent.getLastChild().equals(parent)) {
-						DefaultMutableTreeNode uncle = (DefaultMutableTreeNode) grandParent.getChildAfter(parent);
-						newParent = uncle;
-						newIdx = 0;
-					} else if (grandParent.equals(root)) {
-						return;
-					} else {
-						newParent = grandParent;
-						newIdx = newParent.getChildCount();
-					}
-				}
-
-				parent = newParent;
-			}
-
-			listModel.removeNodeFromParent(node);
-			listModel.insertNodeInto(node, parent, newIdx);
-		} catch (NullPointerException | IllegalArgumentException ignored) {
-		}
-	}
-	*/
-
-	/*
-	private void deleteNode() {
-		TreePath path = legList.getSelectionPath();
-		if (path == null) { //There is no selection. Default to the root node.
-			return;
-		}
-		DefaultMutableTreeNode node = (DefaultMutableTreeNode) ( path.getLastPathComponent() );
-		listModel.removeNodeFromParent(node);
-	}
-	*/
-
 
 	private void addTier() {
 		TierPane newTier = new TierPane();
