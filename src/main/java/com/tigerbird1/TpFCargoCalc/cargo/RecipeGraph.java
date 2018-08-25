@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public final class RecipeGraph implements DataDelegate {
+	private static int recipeCounter = 0;
 	private HashMap<Cargo, RecipeItem> vertices;
 	private HashSet<Recipe> edges;
 
@@ -98,7 +99,6 @@ public final class RecipeGraph implements DataDelegate {
 
 		Recipe createRecipe() {
 			Recipe ret = new Recipe();
-
 			inputs.forEach(ret::addComponent);
 			outputs.forEach(ret::addProduct);
 
@@ -116,6 +116,7 @@ public final class RecipeGraph implements DataDelegate {
 	private final class Recipe {
 		private HashMap<RecipeItem, Integer> products;
 		private HashMap<RecipeItem, Integer> components;
+		private final int id = ++recipeCounter;
 
 		Recipe() {
 			this.products = new HashMap<>();
@@ -134,7 +135,7 @@ public final class RecipeGraph implements DataDelegate {
 		private Cargo cargo;
 
 		RecipeItem(Cargo cargo) { this.cargo = cargo; }
-		RecipeItem(String cargoName) { this.cargo = cargoes.getCargoByCID(cargoName); }
+		RecipeItem(String cargoName) { this.cargo = cargoes.getCargoByName(cargoName); }
 		RecipeItem(int c_id) { this.cargo = cargoes.getCargoByCID(c_id); }
 
 		Cargo getCargo() { return cargo; }

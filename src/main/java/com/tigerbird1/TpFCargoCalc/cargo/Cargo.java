@@ -20,7 +20,7 @@ public class Cargo {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		Cargo cargo = (Cargo) o;
-		return c_id == cargo.c_id && name.equals(cargo.name);
+		return c_id == cargo.c_id;
 	}
 
 	@Override

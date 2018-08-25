@@ -71,5 +71,5 @@ public class Cargoes implements DataDelegate {
 		return Cargo.NIL_CARGO;
 	}
 
-	public Cargo[] getCargoes() { return  (cargoes == null) ? (new Cargo[] {Cargo.NIL_CARGO}) : (cargoes.toArray(new Cargo[0])); }
+	public Cargo[] getCargoes() { return  (cargoes == null) ? (new Cargo[0]) : (cargoes.toArray(new Cargo[0])); }
 }
